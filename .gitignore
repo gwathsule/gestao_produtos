@@ -29,6 +29,5 @@ replay_pid*
 # Java
 */.gradle/*
 */build/*
+.gradle/*
 
-git rm --cached domain/.gradle/8.5/fileHashes/fileHashes.lock
-git rm --cached  domain/.gradle/buildOutputCleanup/buildOutputCleanup.lock

@@ -1,0 +1,4 @@
+rootProject.name = 'gestao_produtos'
+include 'domain'
+include 'application'
+include 'infrastructure'

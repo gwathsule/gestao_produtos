@@ -1,4 +1,4 @@
-package com.company.admin.produtos.infrastructure;
+package com.company.admin.product_management.infrastructure;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.

@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'com.company.admin.produtos.infrastructure'
+group = 'com.company.admin.product_management.infrastructure'
 version = '1.0-SNAPSHOT'
 
 repositories {
