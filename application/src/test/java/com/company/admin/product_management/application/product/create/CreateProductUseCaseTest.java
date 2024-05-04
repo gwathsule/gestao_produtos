@@ -1,7 +1,5 @@
-package com.company.admin.product_management.application;
+package com.company.admin.product_management.application.product.create;
 
-import com.company.admin.product_management.application.product.create.CreateProductCommand;
-import com.company.admin.product_management.application.product.create.DefaultCreateProductUseCase;
 import com.company.admin.product_management.domain.exceptions.DomainException;
 import com.company.admin.product_management.domain.product.ProductGateway;
 import org.junit.jupiter.api.Assertions;
@@ -23,7 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UseCaseTest {
+public class CreateProductUseCaseTest {
 
     @InjectMocks
     private DefaultCreateProductUseCase useCase;
@@ -54,13 +52,13 @@ public class UseCaseTest {
         );
 
         when(gateway.create(any())).thenAnswer(returnsFirstArg());
-        final var actualOutput = useCase.execute(aCommand);
+        final var actualOutput = useCase.execute(aCommand).get();
 
         Assertions.assertNotNull(actualOutput);
         Assertions.assertNotNull(actualOutput.id());
 
         Mockito.verify(gateway, times(1)).create(argThat(aProduct ->
-                        Objects.equals(expectedCode, aProduct.getCode())
+                Objects.equals(expectedCode, aProduct.getCode())
                         && Objects.equals(expectedDescription, aProduct.getDescription())
                         && Objects.equals(expectedFabricatedAt, aProduct.getFabricatedAt())
                         && Objects.equals(expectedExpiredAt, aProduct.getExpiredAt())
@@ -77,32 +75,34 @@ public class UseCaseTest {
 
     @Test
     public void givenSomeInvalidData_whenCallsCreateProduct_shouldReturnReturnException() {
-        final var code = 1234L;
-        final var description = "A normal product description.";
+        final Long invalidCode = null;
+        final String invalidDescription = null;
         final var invalidFabricatedAt = Instant.now().plus(50, ChronoUnit.DAYS);
         final var invalidExpiredAt = Instant.now();
         final var supplierCode = "supplier-code";
         final var supplierDescription = "A normal supplier description.";
-        final var supplierCNPJ = "59456277000176";
+        final var invalidSupplierCNPJ = "5945627176";
         final var isActive = true;
-        final var expectedErrorMessage = "'expiredAt' should not be before the fabricatedAt";
-        final var expectedErrorCount = 1;
+        final var expectedFirstErrorMessage = "'description' should not be null";
+        final var expectedErrorCount = 4;
 
 
         final var aCommand = CreateProductCommand.with(
-                code,
-                description,
+                invalidCode,
+                invalidDescription,
                 invalidFabricatedAt,
                 invalidExpiredAt,
                 supplierCode,
                 supplierDescription,
-                supplierCNPJ,
+                invalidSupplierCNPJ,
                 isActive
         );
 
-        final var actualException = Assertions.assertThrows(DomainException.class, () -> useCase.execute(aCommand));
-        Assertions.assertEquals(expectedErrorMessage, actualException.getMessage());
-        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
+        final var notification = useCase.execute(aCommand).getLeft();
+
+        Assertions.assertEquals(expectedErrorCount, notification.getErrors().size());
+        Assertions.assertEquals(expectedFirstErrorMessage, notification.firstError().message());
         Mockito.verify(gateway, times(0)).create(any());
     }
+
 }

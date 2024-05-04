@@ -2,9 +2,14 @@ package com.company.admin.product_management.application.product.create;
 
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
+import com.company.admin.product_management.domain.validation.handler.Notification;
 import com.company.admin.product_management.domain.validation.handler.ThrowsValidationHandler;
+import io.vavr.API;
+import io.vavr.control.Either;
 
 import java.util.Objects;
+
+import static io.vavr.API.Left;
 
 public class DefaultCreateProductUseCase extends CreateProductUseCase {
 
@@ -15,7 +20,7 @@ public class DefaultCreateProductUseCase extends CreateProductUseCase {
     }
 
     @Override
-    public CreateProductOutput execute(final CreateProductCommand aCommand) {
+    public Either<Notification, CreateProductOutput> execute(final CreateProductCommand aCommand) {
         final var aProduct = Product.newProduct(
                 aCommand.aCode(),
                 aCommand.aDescription(),
@@ -26,8 +31,21 @@ public class DefaultCreateProductUseCase extends CreateProductUseCase {
                 aCommand.aSupplierCNPJ(),
                 aCommand.isActive()
         );
-        aProduct.validate(new ThrowsValidationHandler());
 
-        return CreateProductOutput.from(this.productGateway.create(aProduct));
+        final var notification = Notification.create();
+        aProduct.validate(notification);
+
+        if(notification.hasError()) {
+            //TODO
+        }
+
+        return notification.hasError() ? Left(notification) : create(aProduct);
     }
+
+    private Either<Notification, CreateProductOutput> create(final Product aProduct) {
+        return API.Try(() -> this.productGateway.create(aProduct))
+                .toEither()
+                .bimap(Notification::create, CreateProductOutput::from);
+    }
+
 }
