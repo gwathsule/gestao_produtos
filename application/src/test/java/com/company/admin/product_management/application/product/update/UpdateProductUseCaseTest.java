@@ -5,6 +5,7 @@ import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
 import com.company.admin.product_management.domain.product.ProductID;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UpdateCategoryUseCaseTest {
+public class UpdateProductUseCaseTest {
 
     @InjectMocks
     private DefaultUpdateProductUseCase useCase;
@@ -31,11 +32,14 @@ public class UpdateCategoryUseCaseTest {
     @Mock
     private ProductGateway productGateway;
 
-    // 1. Teste do caminho feliz
+    @BeforeEach
+    void cleanUp() {
+        Mockito.reset(productGateway);
+    }
+
     // 2. Teste passando uma propriedade inválida (name) TODO
     // 3. Teste atualizando um produto para inativa TODO
     // 4. Teste simulando um erro generico vindo do gateway TODO
-    // 5. Teste atualizar produto passando ID inválido
 
     @Test
     public void givenAValidCommand_whenCallsUpdateProduct_shouldReturnProductId() {

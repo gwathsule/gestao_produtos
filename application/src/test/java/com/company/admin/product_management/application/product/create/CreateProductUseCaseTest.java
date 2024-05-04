@@ -2,6 +2,7 @@ package com.company.admin.product_management.application.product.create;
 
 import com.company.admin.product_management.domain.product.ProductGateway;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +27,12 @@ public class CreateProductUseCaseTest {
     private DefaultCreateProductUseCase useCase;
 
     @Mock
-    private ProductGateway gateway;
+    private ProductGateway productGateway;
+
+    @BeforeEach
+    void cleanUp() {
+        Mockito.reset(productGateway);
+    }
 
     @Test
     public void givenAValidCommand_whenCallsCreateProduct_shouldReturnProductId() {
@@ -50,13 +56,13 @@ public class CreateProductUseCaseTest {
                 expectedIsActive
         );
 
-        when(gateway.create(any())).thenAnswer(returnsFirstArg());
+        when(productGateway.create(any())).thenAnswer(returnsFirstArg());
         final var actualOutput = useCase.execute(aCommand).get();
 
         Assertions.assertNotNull(actualOutput);
         Assertions.assertNotNull(actualOutput.id());
 
-        Mockito.verify(gateway, times(1)).create(argThat(aProduct ->
+        Mockito.verify(productGateway, times(1)).create(argThat(aProduct ->
                 Objects.equals(expectedCode, aProduct.getCode())
                         && Objects.equals(expectedDescription, aProduct.getDescription())
                         && Objects.equals(expectedFabricatedAt, aProduct.getFabricatedAt())
@@ -101,7 +107,7 @@ public class CreateProductUseCaseTest {
 
         Assertions.assertEquals(expectedErrorCount, notification.getErrors().size());
         Assertions.assertEquals(expectedFirstErrorMessage, notification.firstError().message());
-        Mockito.verify(gateway, times(0)).create(any());
+        Mockito.verify(productGateway, times(0)).create(any());
     }
 
 }
