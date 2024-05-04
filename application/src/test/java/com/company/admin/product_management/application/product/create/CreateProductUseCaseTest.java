@@ -1,6 +1,5 @@
 package com.company.admin.product_management.application.product.create;
 
-import com.company.admin.product_management.domain.exceptions.DomainException;
 import com.company.admin.product_management.domain.product.ProductGateway;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

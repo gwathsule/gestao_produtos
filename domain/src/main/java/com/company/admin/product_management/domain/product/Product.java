@@ -76,6 +76,53 @@ public class Product extends AggregateRoot<ProductID> {
                 );
     }
 
+    public static Product with(final Product aProduct) {
+        return with(
+                aProduct.getId(),
+                aProduct.code,
+                aProduct.description,
+                aProduct.fabricatedAt,
+                aProduct.expiredAt,
+                aProduct.supplierCode,
+                aProduct.supplierDescription,
+                aProduct.supplierCNPJ,
+                aProduct.active,
+                aProduct.createdAt,
+                aProduct.updatedAt,
+                aProduct.deletedAt
+        );
+    }
+
+    public static Product with(
+            final ProductID anID,
+            final Long aCode,
+            final String aDescription,
+            final Instant aFabricatedAt,
+            final Instant anExpiredAt,
+            final String anSupplierCode,
+            final String aSupplierDescription,
+            final String aSupplierCNPJ,
+            final boolean isActive,
+            final Instant aCreatedAt,
+            final Instant anUpdatedAt,
+            final Instant aDeletedAt
+    ) {
+        return new Product(
+                anID,
+                aCode,
+                aDescription,
+                aFabricatedAt,
+                anExpiredAt,
+                anSupplierCode,
+                aSupplierDescription,
+                aSupplierCNPJ,
+                isActive,
+                aCreatedAt,
+                anUpdatedAt,
+                aDeletedAt
+        );
+    }
+
     public Product update(
             final Long aCode,
             final String aDescription,
