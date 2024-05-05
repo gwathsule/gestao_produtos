@@ -5,6 +5,7 @@ import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
 import com.company.admin.product_management.domain.product.ProductID;
 import com.company.admin.product_management.domain.product.ProductSearchQuery;
+import com.company.admin.product_management.infrastructure.product.persistence.ProductJpaEntity;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +22,8 @@ public class ProductMySQLGateway implements ProductGateway {
     }
 
     @Override
-    public Product create(Product aProduct) {
-        return null;
+    public Product create( final Product aProduct) {
+        return save(aProduct);
     }
 
     @Override
@@ -36,12 +37,21 @@ public class ProductMySQLGateway implements ProductGateway {
     }
 
     @Override
+    public Optional<Product> findByCode(Long anCode) {
+        return Optional.empty();
+    }
+
+    @Override
     public Product update(Product aProduct) {
-        return null;
+        return save(aProduct);
     }
 
     @Override
     public Pagination<Product> findAll(ProductSearchQuery aQuery) {
         return null;
+    }
+
+    private Product save(final Product aProduct) {
+        return this.repository.save(ProductJpaEntity.from(aProduct)).toAggregate();
     }
 }

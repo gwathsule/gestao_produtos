@@ -17,7 +17,6 @@ public class ProductValidator extends Validator {
     @Override
     public void validate() {
         checkDescriptionConstraints();
-        checkCodeConstraints();
         checkExpiredAtConstraints();
         checkSupplierCNPJConstraints();
     }
@@ -27,14 +26,6 @@ public class ProductValidator extends Validator {
 
         if(description == null) {
             this.validationHandler().append(new Error("'description' should not be null"));
-        }
-    }
-
-    private void checkCodeConstraints() {
-        final var code = this.product.getCode();
-
-        if(code == null) {
-            this.validationHandler().append(new Error("'code' should not be null"));
         }
     }
 

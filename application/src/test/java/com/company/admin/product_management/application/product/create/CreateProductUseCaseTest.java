@@ -36,7 +36,6 @@ public class CreateProductUseCaseTest {
 
     @Test
     public void givenAValidCommand_whenCallsCreateProduct_shouldReturnProductId() {
-        final var expectedCode = 1234L;
         final var expectedDescription = "A normal product description.";
         final var expectedFabricatedAt = Instant.now();
         final var expectedExpiredAt = Instant.now().plus(50, ChronoUnit.DAYS);
@@ -46,7 +45,6 @@ public class CreateProductUseCaseTest {
         final var expectedIsActive = true;
 
         final var aCommand = CreateProductCommand.with(
-                expectedCode,
                 expectedDescription,
                 expectedFabricatedAt,
                 expectedExpiredAt,
@@ -63,8 +61,7 @@ public class CreateProductUseCaseTest {
         Assertions.assertNotNull(actualOutput.id());
 
         Mockito.verify(productGateway, times(1)).create(argThat(aProduct ->
-                Objects.equals(expectedCode, aProduct.getCode())
-                        && Objects.equals(expectedDescription, aProduct.getDescription())
+                Objects.equals(expectedDescription, aProduct.getDescription())
                         && Objects.equals(expectedFabricatedAt, aProduct.getFabricatedAt())
                         && Objects.equals(expectedExpiredAt, aProduct.getExpiredAt())
                         && Objects.equals(expectedSupplierCode, aProduct.getSupplierCode())
@@ -80,7 +77,6 @@ public class CreateProductUseCaseTest {
 
     @Test
     public void givenSomeInvalidData_whenCallsCreateProduct_shouldReturnReturnException() {
-        final Long invalidCode = null;
         final String invalidDescription = null;
         final var invalidFabricatedAt = Instant.now().plus(50, ChronoUnit.DAYS);
         final var invalidExpiredAt = Instant.now();
@@ -89,11 +85,10 @@ public class CreateProductUseCaseTest {
         final var invalidSupplierCNPJ = "5945627176";
         final var isActive = true;
         final var expectedFirstErrorMessage = "'description' should not be null";
-        final var expectedErrorCount = 4;
+        final var expectedErrorCount = 3;
 
 
         final var aCommand = CreateProductCommand.with(
-                invalidCode,
                 invalidDescription,
                 invalidFabricatedAt,
                 invalidExpiredAt,

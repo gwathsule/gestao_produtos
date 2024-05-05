@@ -70,26 +70,6 @@ public class ProductTest {
     }
 
     @Test
-    public void givenAnNullCode_whenCallNewProductAndValidate_thenShouldReceiveError(){
-        final var expectedErrorCount = 1;
-        final var expectedErrorMessage ="'code' should not be null";
-        final Long invalidCode = null;
-
-        validateError(
-                invalidCode,
-                "A normal product description.",
-                Instant.now(),
-                Instant.now().plus(50, ChronoUnit.DAYS),
-                "supplier-code",
-                "A normal supplier description.",
-                "59456277000176",
-                true,
-                expectedErrorCount,
-                expectedErrorMessage
-        );
-    }
-
-    @Test
     public void givenAnSupplierCNPJLengthOtherThan14_whenCallNewProductAndValidate_thenShouldReceiveError(){
         final var expectedErrorCount = 1;
         final var expectedErrorMessage = "'CNPJ' should be 14 characters";

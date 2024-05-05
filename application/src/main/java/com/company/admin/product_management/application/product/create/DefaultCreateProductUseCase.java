@@ -22,7 +22,6 @@ public class DefaultCreateProductUseCase extends CreateProductUseCase {
     @Override
     public Either<Notification, CreateProductOutput> execute(final CreateProductCommand aCommand) {
         final var aProduct = Product.newProduct(
-                aCommand.aCode(),
                 aCommand.aDescription(),
                 aCommand.aFabricatedAt(),
                 aCommand.anExpiredAt(),
@@ -34,10 +33,6 @@ public class DefaultCreateProductUseCase extends CreateProductUseCase {
 
         final var notification = Notification.create();
         aProduct.validate(notification);
-
-        if(notification.hasError()) {
-            //TODO
-        }
 
         return notification.hasError() ? Left(notification) : create(aProduct);
     }

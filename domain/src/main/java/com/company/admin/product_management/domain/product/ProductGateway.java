@@ -12,6 +12,8 @@ public interface ProductGateway {
 
     Optional<Product> findById(ProductID anId);
 
+    Optional<Product> findByCode(Long anCode);
+
     Product update(Product aProduct);
 
     Pagination<Product> findAll(ProductSearchQuery aQuery);

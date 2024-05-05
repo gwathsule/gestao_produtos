@@ -4,6 +4,7 @@ import com.company.admin.product_management.domain.AggregateRoot;
 import com.company.admin.product_management.domain.validation.ValidationHandler;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class Product extends AggregateRoot<ProductID> {
 
@@ -47,6 +48,32 @@ public class Product extends AggregateRoot<ProductID> {
         this.deletedAt = aDeletedAt;
     }
 
+    private Product(
+            final ProductID anID,
+            final String aDescription,
+            final Instant aFabricatedAt,
+            final Instant anExpiredAt,
+            final String anSupplierCode,
+            final String aSupplierDescription,
+            final String aSupplierCNPJ,
+            final boolean isActive,
+            final Instant aCreatedAt,
+            final Instant anUpdatedAt,
+            final Instant aDeletedAt
+    ) {
+        super(anID);
+        this.description = aDescription;
+        this.fabricatedAt = aFabricatedAt;
+        this.expiredAt = anExpiredAt;
+        this.supplierCode = anSupplierCode;
+        this.supplierDescription = aSupplierDescription;
+        this.supplierCNPJ = aSupplierCNPJ;
+        this.active = isActive;
+        this.createdAt = Objects.requireNonNull(aCreatedAt);
+        this.updatedAt = Objects.requireNonNull(anUpdatedAt);
+        this.deletedAt = aDeletedAt;
+    }
+
     public static Product newProduct(
             final Long aCode,
             final String aDescription,
@@ -74,6 +101,33 @@ public class Product extends AggregateRoot<ProductID> {
                 now,
                 deletedAt
                 );
+    }
+
+    public static Product newProduct(
+            final String aDescription,
+            final Instant aFabricatedAt,
+            final Instant anExpiredAt,
+            final String anSupplierCode,
+            final String aSupplierDescription,
+            final String aSupplierCNPJ,
+            final boolean isActive
+    ) {
+        final var id = ProductID.unique();
+        final var now = Instant.now();
+        final var deletedAt = isActive ? null : now;
+        return new Product(
+                id,
+                aDescription,
+                aFabricatedAt,
+                anExpiredAt,
+                anSupplierCode,
+                aSupplierDescription,
+                aSupplierCNPJ,
+                isActive,
+                now,
+                now,
+                deletedAt
+        );
     }
 
     public static Product with(final Product aProduct) {

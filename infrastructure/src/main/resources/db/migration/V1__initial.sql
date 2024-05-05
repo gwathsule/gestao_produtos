@@ -1,6 +1,6 @@
 CREATE TABLE products(
     id VARCHAR(36) NOT NULL,
-    code INT NOT NULL PRIMARY KEY,
+    code INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     description VARCHAR(255) NOT NULL,
     fabricated_at DATETIME(6),
     expired_at DATETIME(6),

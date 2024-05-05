@@ -3,10 +3,7 @@ package com.company.admin.product_management.infrastructure.product.persistence;
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
@@ -14,10 +11,11 @@ import java.time.Instant;
 public class ProductJpaEntity {
 
     @Id
-    private String id;
-
-    @Column(name = "code", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long code;
+
+    @Column (name = "id", length = 36, nullable = false)
+    private String id;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -101,6 +99,32 @@ public class ProductJpaEntity {
     ) {
         this.id = id;
         this.code = code;
+        this.description = description;
+        this.fabricatedAt = fabricatedAt;
+        this.expiredAt = expiredAt;
+        this.supplierCode = supplierCode;
+        this.supplierDescription = supplierDescription;
+        this.supplierCNPJ = supplierCNPJ;
+        this.active = active;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.deletedAt = deletedAt;
+    }
+
+    private ProductJpaEntity(
+            String id,
+            String description,
+            Instant fabricatedAt,
+            Instant expiredAt,
+            String supplierCode,
+            String supplierDescription,
+            String supplierCNPJ,
+            boolean active,
+            Instant createdAt,
+            Instant updatedAt,
+            Instant deletedAt
+    ) {
+        this.id = id;
         this.description = description;
         this.fabricatedAt = fabricatedAt;
         this.expiredAt = expiredAt;
