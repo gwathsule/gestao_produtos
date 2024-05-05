@@ -2,7 +2,6 @@ package com.company.admin.product_management.application.product.delete;
 
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
-import com.company.admin.product_management.domain.product.ProductID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,29 +45,29 @@ public class DeleteProductUseCaseTest {
         );
         final var expectedId = aProduct.getId();
 
-        doNothing().when(productGateway).deleteById(eq(expectedId));
+        doNothing().when(productGateway).deleteByCode(eq(aProduct.getCode()));
 
-        Assertions.assertDoesNotThrow(() -> useCase.execute(expectedId.getValue()));
-        Mockito.verify(productGateway, times(1)).deleteById(eq(expectedId));
+        Assertions.assertDoesNotThrow(() -> useCase.execute(aProduct.getCode()));
+        Mockito.verify(productGateway, times(1)).deleteByCode(eq(aProduct.getCode()));
     }
 
     @Test
     public void givenAInvalidID_whenCallsDeleteProduct_shouldBeOk() {
-        final var expectedId = ProductID.from("123");
+        final var expectedCode = 1234L;
 
-        doNothing().when(productGateway).deleteById(eq(expectedId));
+        doNothing().when(productGateway).deleteByCode(eq(expectedCode));
 
-        Assertions.assertDoesNotThrow(() -> useCase.execute(expectedId.getValue()));
-        Mockito.verify(productGateway, times(1)).deleteById(eq(expectedId));
+        Assertions.assertDoesNotThrow(() -> useCase.execute(expectedCode));
+        Mockito.verify(productGateway, times(1)).deleteByCode(eq(expectedCode));
     }
 
     @Test
     public void givenAValidID_whenGatewayThrowsException_shouldReturnException() {
-        final var expectedId = ProductID.from("123");
+        final var expectedCode = 1234L;
 
-        doThrow(new IllegalStateException("Gateway Error")).when(productGateway).deleteById(eq(expectedId));
+        doThrow(new IllegalStateException("Gateway Error")).when(productGateway).deleteByCode(eq(1234L));
 
-        Assertions.assertThrows(IllegalStateException.class, () -> useCase.execute(expectedId.getValue()));
-        Mockito.verify(productGateway, times(1)).deleteById(eq(expectedId));
+        Assertions.assertThrows(IllegalStateException.class, () -> useCase.execute(1234L));
+        Mockito.verify(productGateway, times(1)).deleteByCode(eq(1234L));
     }
 }

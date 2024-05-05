@@ -3,7 +3,6 @@ package com.company.admin.product_management.infrastructure.product;
 import com.company.admin.product_management.domain.pagination.Pagination;
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
-import com.company.admin.product_management.domain.product.ProductID;
 import com.company.admin.product_management.domain.product.ProductSearchQuery;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductJpaEntity;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductRepository;
@@ -27,18 +26,16 @@ public class ProductMySQLGateway implements ProductGateway {
     }
 
     @Override
-    public void deleteById(ProductID anId) {
-
-    }
-
-    @Override
-    public Optional<Product> findById(ProductID anId) {
-        return Optional.empty();
+    public void deleteByCode(Long code) {
+        if(this.repository.existsById(code)) {
+            this.repository.deleteById(code);
+        }
     }
 
     @Override
     public Optional<Product> findByCode(Long anCode) {
-        return Optional.empty();
+        return this.repository.findById(anCode)
+                .map(ProductJpaEntity::toAggregate);
     }
 
     @Override

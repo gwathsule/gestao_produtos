@@ -3,12 +3,10 @@ package com.company.admin.product_management.application.product.update;
 import com.company.admin.product_management.domain.exceptions.DomainException;
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
-import com.company.admin.product_management.domain.product.ProductID;
 import com.company.admin.product_management.domain.validation.Error;
 import com.company.admin.product_management.domain.validation.handler.Notification;
 import io.vavr.control.Either;
 
-import java.time.Instant;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -26,8 +24,8 @@ public class DefaultUpdateProductUseCase extends UpdateProductUseCase{
     @Override
     public Either<Notification, UpdateProductOutput> execute(final UpdateProductCommand aCommand) {
 
-        final var anId = ProductID.from(aCommand.id());
-        final var aProduct = this.productGateway.findById(anId).orElseThrow(notFound(anId));
+        final var code = aCommand.code();
+        final var aProduct = this.productGateway.findByCode(code).orElseThrow(notFound(code));
         final var notification = Notification.create();
 
         aProduct.update(
@@ -50,7 +48,7 @@ public class DefaultUpdateProductUseCase extends UpdateProductUseCase{
                 .bimap(Notification::create, UpdateProductOutput::from);
     }
 
-    private Supplier<DomainException> notFound(ProductID anId) {
-        return () -> DomainException.with(new Error("Product with ID %s was not found".formatted(anId.getValue())));
+    private Supplier<DomainException> notFound(Long aCode) {
+        return () -> DomainException.with(new Error("Product with code %s was not found".formatted(aCode.toString())));
     }
 }

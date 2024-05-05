@@ -3,7 +3,6 @@ package com.company.admin.product_management.application.product.update;
 import com.company.admin.product_management.domain.exceptions.DomainException;
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
-import com.company.admin.product_management.domain.product.ProductID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,8 +54,8 @@ public class UpdateProductUseCaseTest {
                 true
         );
 
-        final var expectedId = aProduct.getId();
         final var expectedCode = 1234L;
+        final var expectedId = aProduct.getId();
         final var expectedDescription = "A updated normal product description.";
         final var expectedFabricatedAt = Instant.now().plus(5, ChronoUnit.DAYS);
         final var expectedExpiredAt = Instant.now().plus(50, ChronoUnit.DAYS);
@@ -78,7 +77,7 @@ public class UpdateProductUseCaseTest {
                 expectedIsActive
         );
 
-        when(productGateway.findById(eq(expectedId)))
+        when(productGateway.findByCode(eq(expectedCode)))
                 .thenReturn(Optional.of(Product.with(aProduct)));
 
         when(productGateway.update(any()))
@@ -89,11 +88,11 @@ public class UpdateProductUseCaseTest {
         Assertions.assertNotNull(actualOutput);
         Assertions.assertNotNull(actualOutput.id());
 
-        Mockito.verify(productGateway, times(1)).findById(eq(expectedId));
+        Mockito.verify(productGateway, times(1)).findByCode(eq(expectedCode));
 
         Mockito.verify(productGateway, times(1)).update(argThat(
                 aUpdatedProduct ->
-                        Objects.equals(expectedCode, aUpdatedProduct.getCode())
+                        Objects.equals(expectedId, aUpdatedProduct.getId())
                                 && Objects.equals(expectedDescription, aUpdatedProduct.getDescription())
                                 && Objects.equals(expectedFabricatedAt, aUpdatedProduct.getFabricatedAt())
                                 && Objects.equals(expectedExpiredAt, aUpdatedProduct.getExpiredAt())
@@ -101,7 +100,7 @@ public class UpdateProductUseCaseTest {
                                 && Objects.equals(expectedSupplierDescription, aUpdatedProduct.getSupplierDescription())
                                 && Objects.equals(expectedSupplierCNPJ, aUpdatedProduct.getSupplierCNPJ())
                                 && Objects.equals(expectedIsActive, aUpdatedProduct.isActive())
-                                && Objects.equals(expectedId, aUpdatedProduct.getId())
+                                && Objects.equals(expectedCode, aUpdatedProduct.getCode())
                                 && Objects.equals(aProduct.getCreatedAt(), aUpdatedProduct.getCreatedAt())
                                 && aProduct.getUpdatedAt().isBefore(aUpdatedProduct.getUpdatedAt())
                                 && Objects.isNull(aUpdatedProduct.getDeletedAt())
@@ -111,8 +110,8 @@ public class UpdateProductUseCaseTest {
     @Test
     public void givenACommandWithInvalid_whenCallsUpdateProduct_shouldReturnNotFoundError()
     {
-        final var expectedId = "1234";
         final var expectedCode = 1234L;
+        final var expectedId = "1234";
         final var expectedDescription = "A updated normal product description.";
         final var expectedFabricatedAt = Instant.now().plus(5, ChronoUnit.DAYS);
         final var expectedExpiredAt = Instant.now().plus(50, ChronoUnit.DAYS);
@@ -120,7 +119,7 @@ public class UpdateProductUseCaseTest {
         final var expectedSupplierDescription = "A updated normal supplier description.";
         final var expectedSupplierCNPJ = "59456277000100";
         final var expectedIsActive = true;
-        final var expectedErrorMessage = "Product with ID 1234 was not found";
+        final var expectedErrorMessage = "Product with code 1234 was not found";
         final var expectedErrorCount = 1;
 
 
@@ -136,7 +135,7 @@ public class UpdateProductUseCaseTest {
                 expectedIsActive
         );
 
-        when(productGateway.findById(eq(ProductID.from(expectedId))))
+        when(productGateway.findByCode(eq(expectedCode)))
                 .thenReturn(Optional.empty());
 
         final var actualException = Assertions.assertThrows(DomainException.class, () -> useCase.execute(aCommand));
@@ -144,7 +143,7 @@ public class UpdateProductUseCaseTest {
         Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
         Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
 
-        Mockito.verify(productGateway, times(1)).findById(eq(ProductID.from(expectedId)));
+        Mockito.verify(productGateway, times(1)).findByCode(eq(expectedCode));
 
         Mockito.verify(productGateway, times(0)).update(any());
 

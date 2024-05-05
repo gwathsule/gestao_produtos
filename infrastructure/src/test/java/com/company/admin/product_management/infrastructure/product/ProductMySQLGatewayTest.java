@@ -155,4 +155,77 @@ public class ProductMySQLGatewayTest {
         Assertions.assertEquals(aProduct.getId().getValue(), actualEntity.getId());
         Assertions.assertEquals(actualProduct.getCode(), actualEntity.getCode());
     }
+
+    @Test
+    public void givenAPrePersistedProductAndValidProductCode_whenTryToDeleteIt_thenShouldDelete() {
+        final var aProduct = Product.newProduct(
+                "A normal product description.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "supplier-code",
+                "A normal supplier description.",
+                "59456277000176",
+                true
+        );
+
+        Assertions.assertEquals(0, productRepository.count());
+        final var savedProduct = productRepository.saveAndFlush(ProductJpaEntity.from(aProduct));
+        Assertions.assertEquals(1, productRepository.count());
+        productGateway.deleteByCode(savedProduct.getCode());
+        Assertions.assertEquals(0, productRepository.count());
+    }
+
+    @Test
+    public void givenAInvalidProductCode_whenTryToDeleteIt_thenShouldNotThrownError() {
+        Assertions.assertEquals(0, productRepository.count());
+        productGateway.deleteByCode(123L);
+        Assertions.assertEquals(0, productRepository.count());
+    }
+
+    @Test
+    public void givenAPrePersistedProductAndValidProductCode_whenCallsFindByCode_thenShouldReturnProduct()
+    {
+        final var expectedDescription = "A normal product description.";
+        final var expectedFabricatedAt = Instant.now();
+        final var expectedExpiredAt = Instant.now().plus(50, ChronoUnit.DAYS);
+        final var expectedSupplierCode = "supplier-code";
+        final var expectedSupplierDescription = "A normal supplier description.";
+        final var expectedSupplierCNPJ = "59456277000176";
+        final var expectedIsActive = true;
+
+        final var aProduct = Product.newProduct(
+                expectedDescription,
+                expectedFabricatedAt,
+                expectedExpiredAt,
+                expectedSupplierCode,
+                expectedSupplierDescription,
+                expectedSupplierCNPJ,
+                expectedIsActive
+        );
+
+        Assertions.assertEquals(0, productRepository.count());
+        final var savedProductCode = productRepository.saveAndFlush(ProductJpaEntity.from(aProduct)).getCode();
+        Assertions.assertEquals(1, productRepository.count());
+
+        final var actualProduct = productGateway.findByCode(savedProductCode).get();
+
+        Assertions.assertEquals(expectedDescription, actualProduct.getDescription());
+        Assertions.assertEquals(expectedFabricatedAt, actualProduct.getFabricatedAt());
+        Assertions.assertEquals(expectedExpiredAt, actualProduct.getExpiredAt());
+        Assertions.assertEquals(expectedSupplierCode, actualProduct.getSupplierCode());
+        Assertions.assertEquals(expectedSupplierDescription, actualProduct.getSupplierDescription());
+        Assertions.assertEquals(expectedSupplierCNPJ, actualProduct.getSupplierCNPJ());
+        Assertions.assertEquals(expectedIsActive, actualProduct.isActive());
+        Assertions.assertEquals(aProduct.getCreatedAt(), actualProduct.getCreatedAt());
+        Assertions.assertEquals(aProduct.getUpdatedAt(), actualProduct.getUpdatedAt());
+        Assertions.assertNull(actualProduct.getDeletedAt());
+    }
+
+    @Test
+    public void givenAValidCodeNotStored_whenCallsFindByCode_thenShouldReturnEmpty()
+    {
+        Assertions.assertEquals(0, productRepository.count());
+        final var actualProduct = productGateway.findByCode(213L);
+        Assertions.assertTrue(actualProduct.isEmpty());
+    }
 }

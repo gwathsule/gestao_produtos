@@ -8,9 +8,7 @@ public interface ProductGateway {
 
     Product create(Product aProduct);
 
-    void deleteById(ProductID anId);
-
-    Optional<Product> findById(ProductID anId);
+    void deleteByCode(Long code);
 
     Optional<Product> findByCode(Long anCode);
 

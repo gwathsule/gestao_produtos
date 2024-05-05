@@ -21,10 +21,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class GetProductByIdUseCaseTest {
+public class GetProductByCodeUseCaseTest {
 
     @InjectMocks
-    private DefaultGetProductByIdUseCase useCase;
+    private DefaultGetProductByCodeUseCase useCase;
 
     @Mock
     private ProductGateway productGateway;
@@ -46,15 +46,15 @@ public class GetProductByIdUseCaseTest {
                 "59456277000176",
                 true
         );
-        final var expectedId = aProduct.getId();
+        final var expectedCode = aProduct.getCode();
 
-        when(productGateway.findById(eq(expectedId)))
-                .thenReturn(Optional.of(Product.with(aProduct)));//TODO clone nao funcionou
+        when(productGateway.findByCode(eq(expectedCode)))
+                .thenReturn(Optional.of(Product.with(aProduct)));
 
-        final var actualProduct = useCase.execute(expectedId.getValue());
+        final var actualProduct = useCase.execute(aProduct.getCode());
 
-        Assertions.assertEquals(expectedId, actualProduct.id());
-        Assertions.assertEquals(aProduct.getCode(), actualProduct.code());
+        Assertions.assertEquals(aProduct.getId(), actualProduct.id());
+        Assertions.assertEquals(expectedCode, actualProduct.code());
         Assertions.assertEquals(aProduct.getDescription(), actualProduct.description());
         Assertions.assertEquals(aProduct.getFabricatedAt(), actualProduct.fabricatedAt());
         Assertions.assertEquals(aProduct.getExpiredAt(), actualProduct.expiredAt());
@@ -69,27 +69,29 @@ public class GetProductByIdUseCaseTest {
 
     @Test
     public void givenAInvalidId_whenCallsGetProduct_thenShouldReturnNotFound() {
-        final var expectedErrorMessage = "Product with ID 1234 was not found";
-        final var expectedId = ProductID.from("1234");
+        final var expectedErrorMessage = "Product with code 1234 was not found";
+        final var expectedCode = 1234L;
 
-        when(productGateway.findById(eq(expectedId))).thenReturn(Optional.empty());
+        when(productGateway.findByCode(eq(expectedCode))).thenReturn(Optional.empty());
 
         final var actualException = Assertions.assertThrows(
                 DomainException.class,
-                () -> useCase.execute(expectedId.getValue())
+                () -> useCase.execute(expectedCode)
         );
+
+        Assertions.assertEquals(expectedErrorMessage, actualException.getMessage());
     }
 
     @Test
     public void givenAValidID_whenGatewayThrowsException_shouldReturnException() {
         final var expectedErrorMessage = "Gateway error";
-        final var expectedId = ProductID.from("123");
+        final var expectedCode = 123L;
 
-        when(productGateway.findById(eq(expectedId))).thenThrow(new IllegalStateException(expectedErrorMessage));
+        when(productGateway.findByCode(eq(expectedCode))).thenThrow(new IllegalStateException(expectedErrorMessage));
 
         final var actualException = Assertions.assertThrows(
                 IllegalStateException.class,
-                () -> useCase.execute(expectedId.getValue())
+                () -> useCase.execute(expectedCode)
         );
 
         Assertions.assertEquals(expectedErrorMessage, actualException.getMessage());

@@ -1,6 +1,5 @@
 package com.company.admin.product_management.application.product.retrieve.list;
 
-import com.company.admin.product_management.application.product.retrieve.get.DefaultGetProductByIdUseCase;
 import com.company.admin.product_management.domain.pagination.Pagination;
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
