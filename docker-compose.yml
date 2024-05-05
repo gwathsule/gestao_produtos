@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  mysql:
+    container_name: products_mysql
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=products
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - 3306:3306
+    networks:
+      - products_network
+networks:
+  products_network:
