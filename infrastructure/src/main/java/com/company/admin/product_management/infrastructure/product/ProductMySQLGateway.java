@@ -6,8 +6,16 @@ import com.company.admin.product_management.domain.product.ProductGateway;
 import com.company.admin.product_management.domain.product.ProductSearchQuery;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductJpaEntity;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductRepository;
+import com.company.admin.product_management.infrastructure.utils.SpecificationUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -45,7 +53,30 @@ public class ProductMySQLGateway implements ProductGateway {
 
     @Override
     public Pagination<Product> findAll(ProductSearchQuery aQuery) {
-        return null;
+        final var page = PageRequest.of(
+                aQuery.page(),
+                aQuery.perPage(),
+                Sort.by(Sort.Direction.fromString(aQuery.direction()), aQuery.sort())
+        );
+
+        //dynamic search
+        final var specifications = Optional.ofNullable(aQuery.terms())
+                .filter(str -> !str.isBlank())
+                .map(str -> SpecificationUtils.
+                        <ProductJpaEntity>like("description", str)
+                        .or(SpecificationUtils.like("supplierCode", str))
+                        .or(SpecificationUtils.like("supplierDescription", str))
+                        .or(SpecificationUtils.like("supplierCNPJ", str))
+                )
+                .orElse(null);
+
+        final var pageResult = this.repository.findAll(Specification.where(specifications), page);
+        return new Pagination<>(
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                (int) pageResult.getTotalElements(),
+                pageResult.map(ProductJpaEntity::toAggregate).toList()
+        );
     }
 
     private Product save(final Product aProduct) {

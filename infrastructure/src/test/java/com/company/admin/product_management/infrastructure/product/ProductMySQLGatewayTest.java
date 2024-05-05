@@ -1,6 +1,7 @@
 package com.company.admin.product_management.infrastructure.product;
 
 import com.company.admin.product_management.domain.product.Product;
+import com.company.admin.product_management.domain.product.ProductSearchQuery;
 import com.company.admin.product_management.infrastructure.MySQLGatewayTest;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductJpaEntity;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @MySQLGatewayTest
 public class ProductMySQLGatewayTest {
@@ -227,5 +229,276 @@ public class ProductMySQLGatewayTest {
         Assertions.assertEquals(0, productRepository.count());
         final var actualProduct = productGateway.findByCode(213L);
         Assertions.assertTrue(actualProduct.isEmpty());
+    }
+
+    @Test
+    public void givenPrePersistedProducts_whenCallsFindAll_thenShouldReturnPaginated() {
+        final var expectedPage = 0;
+        final var expectedPerPage = 3;
+        final var expectedTotal = 3;
+
+        final var aProduct1 = Product.newProduct(
+                "first product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "first-product.",
+                "first product.",
+                "11111111111111",
+                true
+        );
+
+        final var aProduct2 = Product.newProduct(
+                "second product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "second-product.",
+                "second product.",
+                "22222222222222",
+                true
+        );
+
+        final var aProduct3 = Product.newProduct(
+                "third product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "third-product.",
+                "third product.",
+                "33333333333333",
+                true
+        );
+
+        Assertions.assertEquals(0, productRepository.count());
+
+        productRepository.saveAll(List.of(
+                ProductJpaEntity.from(aProduct1),
+                ProductJpaEntity.from(aProduct2),
+                ProductJpaEntity.from(aProduct3)
+        ));
+
+        Assertions.assertEquals(3, productRepository.count());
+
+        final var query = new ProductSearchQuery(0, 3, "", "code", "asc");
+
+        final var actualResult = productGateway.findAll(query);
+
+        Assertions.assertEquals(expectedPage, actualResult.currentPage());
+        Assertions.assertEquals(expectedPerPage, actualResult.perPage());
+        Assertions.assertEquals(expectedTotal, actualResult.total());
+        Assertions.assertEquals(expectedPerPage, actualResult.items().size());
+        Assertions.assertEquals(aProduct1.getId(), actualResult.items().get(0).getId());
+        Assertions.assertEquals(aProduct2.getId(), actualResult.items().get(1).getId());
+        Assertions.assertEquals(aProduct3.getId(), actualResult.items().get(2).getId());
+    }
+
+    @Test
+    public void givenEmptyProductsTable_whenCallsFindAll_thenShouldReturnEmptyPage() {
+        final var expectedPage = 0;
+        final var expectedPerPage = 1;
+        final var expectedTotal = 0;
+
+        Assertions.assertEquals(0, productRepository.count());
+
+        final var query = new ProductSearchQuery(0, 1, "", "code", "asc");
+
+        final var actualResult = productGateway.findAll(query);
+
+        Assertions.assertEquals(expectedPage, actualResult.currentPage());
+        Assertions.assertEquals(expectedPerPage, actualResult.perPage());
+        Assertions.assertEquals(expectedTotal, actualResult.total());
+        Assertions.assertEquals(0, actualResult.items().size());
+    }
+
+    @Test
+    public void givenFollowPagination_whenCallsFindAllWithPage1_thenShouldReturnPaginated() {
+        var expectedPage = 0;
+        var expectedPerPage = 1;
+        var expectedTotal = 3;
+
+        final var aProduct1 = Product.newProduct(
+                "first product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "first-product.",
+                "first product.",
+                "11111111111111",
+                true
+        );
+
+        final var aProduct2 = Product.newProduct(
+                "second product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "second-product.",
+                "second product.",
+                "22222222222222",
+                true
+        );
+
+        final var aProduct3 = Product.newProduct(
+                "third product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "third-product.",
+                "third product.",
+                "33333333333333",
+                true
+        );
+
+        Assertions.assertEquals(0, productRepository.count());
+
+        productRepository.saveAll(List.of(
+                ProductJpaEntity.from(aProduct1),
+                ProductJpaEntity.from(aProduct2),
+                ProductJpaEntity.from(aProduct3)
+        ));
+
+        Assertions.assertEquals(3, productRepository.count());
+
+
+        var query = new ProductSearchQuery(0, 1, "", "code", "asc");
+        var actualResult = productGateway.findAll(query);
+
+        Assertions.assertEquals(expectedPage, actualResult.currentPage());
+        Assertions.assertEquals(expectedPerPage, actualResult.perPage());
+        Assertions.assertEquals(expectedTotal, actualResult.total());
+        Assertions.assertEquals(expectedPerPage, actualResult.items().size());
+        Assertions.assertEquals(aProduct1.getId(), actualResult.items().get(0).getId());
+
+        //page 1
+        query = new ProductSearchQuery(1, 1, "", "code", "asc");
+        actualResult = productGateway.findAll(query);
+        expectedPage = 1;
+
+        Assertions.assertEquals(expectedPage, actualResult.currentPage());
+        Assertions.assertEquals(expectedPerPage, actualResult.perPage());
+        Assertions.assertEquals(expectedTotal, actualResult.total());
+        Assertions.assertEquals(expectedPerPage, actualResult.items().size());
+        Assertions.assertEquals(aProduct2.getId(), actualResult.items().get(0).getId());
+
+        //page 1
+        query = new ProductSearchQuery(2, 1, "", "code", "asc");
+        actualResult = productGateway.findAll(query);
+        expectedPage = 2;
+
+        Assertions.assertEquals(expectedPage, actualResult.currentPage());
+        Assertions.assertEquals(expectedPerPage, actualResult.perPage());
+        Assertions.assertEquals(expectedTotal, actualResult.total());
+        Assertions.assertEquals(expectedPerPage, actualResult.items().size());
+        Assertions.assertEquals(aProduct3.getId(), actualResult.items().get(0).getId());
+    }
+
+    @Test
+    public void givenPrePersistedProducts_whenCallsFindAllWithDescriptionMatches_thenShouldReturnPaginated() {
+        final var expectedPage = 0;
+        final var expectedPerPage = 1;
+        final var expectedTotal = 1;
+
+        final var aProduct1 = Product.newProduct(
+                "first product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "first-product.",
+                "first product.",
+                "11111111111111",
+                true
+        );
+
+        final var aProduct2 = Product.newProduct(
+                "second product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "second-product.",
+                "second product.",
+                "22222222222222",
+                true
+        );
+
+        final var aProduct3 = Product.newProduct(
+                "third product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "third-product.",
+                "third product.",
+                "33333333333333",
+                true
+        );
+
+        Assertions.assertEquals(0, productRepository.count());
+
+        productRepository.saveAll(List.of(
+                ProductJpaEntity.from(aProduct1),
+                ProductJpaEntity.from(aProduct2),
+                ProductJpaEntity.from(aProduct3)
+        ));
+
+        Assertions.assertEquals(3, productRepository.count());
+
+        final var query = new ProductSearchQuery(0, 1, "sec", "code", "asc");
+
+        final var actualResult = productGateway.findAll(query);
+
+        Assertions.assertEquals(expectedPage, actualResult.currentPage());
+        Assertions.assertEquals(expectedPerPage, actualResult.perPage());
+        Assertions.assertEquals(expectedTotal, actualResult.total());
+        Assertions.assertEquals(expectedPerPage, actualResult.items().size());
+        Assertions.assertEquals(aProduct2.getId(), actualResult.items().get(0).getId());
+    }
+
+    @Test
+    public void givenPrePersistedProducts_whenCallsFindAllWithSupplierMatches_thenShouldReturnPaginated() {
+        final var expectedPage = 0;
+        final var expectedPerPage = 10;
+        final var expectedTotal = 2;
+
+        final var aProduct1 = Product.newProduct(
+                "first product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "first-product.",
+                "first product supplier.",
+                "11111111111111",
+                true
+        );
+
+        final var aProduct2 = Product.newProduct(
+                "second product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "second-product.",
+                "second product.",
+                "22222222222222",
+                true
+        );
+
+        final var aProduct3 = Product.newProduct(
+                "third product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "third-product.",
+                "third product supplier.",
+                "33333333333333",
+                true
+        );
+
+        Assertions.assertEquals(0, productRepository.count());
+
+        productRepository.saveAll(List.of(
+                ProductJpaEntity.from(aProduct1),
+                ProductJpaEntity.from(aProduct2),
+                ProductJpaEntity.from(aProduct3)
+        ));
+
+        Assertions.assertEquals(3, productRepository.count());
+
+        final var query = new ProductSearchQuery(0, expectedPerPage, "SUPPLIER", "code", "asc");
+
+        final var actualResult = productGateway.findAll(query);
+
+        Assertions.assertEquals(expectedPage, actualResult.currentPage());
+        Assertions.assertEquals(expectedPerPage, actualResult.perPage());
+        Assertions.assertEquals(expectedTotal, actualResult.total());
+        Assertions.assertEquals(expectedTotal, actualResult.items().size());
+        Assertions.assertEquals(aProduct1.getId(), actualResult.items().get(0).getId());
+        Assertions.assertEquals(aProduct3.getId(), actualResult.items().get(1).getId());
     }
 }
