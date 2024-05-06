@@ -1,6 +1,7 @@
 package com.company.admin.product_management.application.product.retrieve.get;
 
 import com.company.admin.product_management.domain.exceptions.DomainException;
+import com.company.admin.product_management.domain.exceptions.NotFoundException;
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
 import com.company.admin.product_management.domain.product.ProductID;
@@ -75,7 +76,7 @@ public class GetProductByCodeUseCaseTest {
         when(productGateway.findByCode(eq(expectedCode))).thenReturn(Optional.empty());
 
         final var actualException = Assertions.assertThrows(
-                DomainException.class,
+                NotFoundException.class,
                 () -> useCase.execute(expectedCode)
         );
 

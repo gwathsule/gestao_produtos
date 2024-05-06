@@ -2,7 +2,11 @@ package com.company.admin.product_management.infrastructure.api;
 
 import com.company.admin.product_management.application.product.create.CreateProductOutput;
 import com.company.admin.product_management.application.product.create.CreateProductUseCase;
+import com.company.admin.product_management.application.product.retrieve.get.GetProductByCodeUseCase;
+import com.company.admin.product_management.application.product.retrieve.get.ProductOutput;
 import com.company.admin.product_management.domain.exceptions.DomainException;
+import com.company.admin.product_management.domain.exceptions.NotFoundException;
+import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.validation.Error;
 import com.company.admin.product_management.domain.validation.handler.Notification;
 import com.company.admin.product_management.infrastructure.ControllerTest;
@@ -22,8 +26,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-import static io.vavr.API.Left;
-import static io.vavr.API.Right;
+import static io.vavr.API.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +44,9 @@ public class ProductAPITest {
 
     @MockBean
     private CreateProductUseCase createProductUseCase;
+
+    @MockBean
+    private GetProductByCodeUseCase getProductByCodeUseCase;
 
     @Test
     public void givenAValidInput_whenCallCreateProductApi_thenReturnCreatedProduct() throws Exception{
@@ -181,4 +187,66 @@ public class ProductAPITest {
                         && Objects.equals(expectedIsActive, cmd.isActive())
         ));
     }
+
+    @Test
+    public void givenAValidProduct_whenCallsGetProductByCodeApi_thenShouldReturnProduct() throws Exception{
+        final var expectedDescription = "A normal product description.";
+        final var expectedFabricatedAt = Instant.now();
+        final var expectedExpiredAt = Instant.now().plus(50, ChronoUnit.DAYS);
+        final var expectedSupplierCode = "supplier-code";
+        final var expectedSupplierDescription = "A normal supplier description.";
+        final var expectedSupplierCNPJ = "59456277000176";
+        final var expectedIsActive = true;
+        final Long expectedCode = 123L;
+
+        final var aProduct = Product.newProduct(
+                expectedCode,
+                expectedDescription,
+                expectedFabricatedAt,
+                expectedExpiredAt,
+                expectedSupplierCode,
+                expectedSupplierDescription,
+                expectedSupplierCNPJ,
+                expectedIsActive
+        );
+
+        when(getProductByCodeUseCase.execute(any())).thenReturn(ProductOutput.from(aProduct));
+
+        final var request = MockMvcRequestBuilders
+                .get("/products/code/{code}", expectedCode.toString())
+                .contentType(MediaType.APPLICATION_JSON);
+        final var response = this.mvc.perform(request).andDo(MockMvcResultHandlers.print());
+
+        response.andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id", equalTo(aProduct.getId().getValue())))
+                        .andExpect(jsonPath("$.description", equalTo(expectedDescription)))
+                        .andExpect(jsonPath("$.fabricated_at", equalTo(expectedFabricatedAt.toString())))
+                        .andExpect(jsonPath("$.expired_at", equalTo(expectedExpiredAt.toString())))
+                        .andExpect(jsonPath("$.supplier_code", equalTo(expectedSupplierCode)))
+                        .andExpect(jsonPath("$.supplier_description", equalTo(expectedSupplierDescription)))
+                        .andExpect(jsonPath("$.supplier_cnpj", equalTo(expectedSupplierCNPJ)))
+                        .andExpect(jsonPath("$.is_active", equalTo(expectedIsActive)))
+                        .andExpect(jsonPath("$.created_at", equalTo(aProduct.getCreatedAt().toString())))
+                        .andExpect(jsonPath("$.updated_at", equalTo(aProduct.getUpdatedAt().toString())))
+                        .andExpect(jsonPath("$.deleted_at", equalTo(aProduct.getDeletedAt())))
+                        .andExpect(jsonPath("$.code", equalTo(expectedCode.toString())));
+        verify(getProductByCodeUseCase, times(1)).execute(eq(expectedCode));
+    }
+
+    @Test
+    public void givenAInvalidProductCode_whenCallsGetProductByCodeApi_thenShouldNotFound() throws Exception{
+        final var expectedErrorMessage = "Product with code 123 was not found";
+        final Long expectedCode = 123L;
+
+        when(getProductByCodeUseCase.execute(any()))
+                .thenThrow(NotFoundException.with(Product.class, expectedCode));
+
+        final var request = MockMvcRequestBuilders.get("/products/code/{code}", expectedCode.toString());
+        final var response = this.mvc.perform(request).andDo(MockMvcResultHandlers.print());
+
+        response.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message", equalTo(expectedErrorMessage)));
+
+    }
+
 }

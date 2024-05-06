@@ -2,6 +2,7 @@ package com.company.admin.product_management.infrastructure.api;
 
 import com.company.admin.product_management.domain.pagination.Pagination;
 import com.company.admin.product_management.infrastructure.product.models.CreateProductApiInput;
+import com.company.admin.product_management.infrastructure.product.models.ProductApiOutput;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -42,4 +43,18 @@ public interface ProductAPI {
             @RequestParam(name = "sort", required = false, defaultValue = "name") final String sort,
             @RequestParam(name = "dir", required = false, defaultValue = "asc") final String direction
     );
+
+    @RequestMapping("/code/{code}")
+    @GetMapping(
+            value = "{code}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "Get product by it's code")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "404", description = "Item not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+    })
+    ProductApiOutput getByCode(@PathVariable String code);
 }
