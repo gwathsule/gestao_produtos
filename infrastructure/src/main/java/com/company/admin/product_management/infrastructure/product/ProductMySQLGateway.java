@@ -6,18 +6,15 @@ import com.company.admin.product_management.domain.product.ProductGateway;
 import com.company.admin.product_management.domain.product.ProductSearchQuery;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductJpaEntity;
 import com.company.admin.product_management.infrastructure.product.persistence.ProductRepository;
-import com.company.admin.product_management.infrastructure.utils.SpecificationUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.company.admin.product_management.infrastructure.utils.SpecificationUtils.like;
 
 @Service
 public class ProductMySQLGateway implements ProductGateway {
@@ -62,11 +59,13 @@ public class ProductMySQLGateway implements ProductGateway {
         //dynamic search
         final var specifications = Optional.ofNullable(aQuery.terms())
                 .filter(str -> !str.isBlank())
-                .map(str -> SpecificationUtils.
-                        <ProductJpaEntity>like("description", str)
-                        .or(SpecificationUtils.like("supplierCode", str))
-                        .or(SpecificationUtils.like("supplierDescription", str))
-                        .or(SpecificationUtils.like("supplierCNPJ", str))
+                .map(str ->{
+                    final Specification<ProductJpaEntity> descriptionLike = like("description", str);
+                    final Specification<ProductJpaEntity> supplierCodeLike = like("supplierCode", str);
+                    final Specification<ProductJpaEntity> supplierDescriptionLike = like("supplierDescription", str);
+                    final Specification<ProductJpaEntity> supplierCNPJnLike = like("supplierCNPJ", str);
+                    return descriptionLike.or(supplierCodeLike).or(supplierDescriptionLike).or(supplierCNPJnLike);
+                }
                 )
                 .orElse(null);
 
