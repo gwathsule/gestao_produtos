@@ -3,6 +3,7 @@ package com.company.admin.product_management.infrastructure.api.controllers;
 import com.company.admin.product_management.application.product.create.CreateProductCommand;
 import com.company.admin.product_management.application.product.create.CreateProductOutput;
 import com.company.admin.product_management.application.product.create.CreateProductUseCase;
+import com.company.admin.product_management.application.product.delete.DeleteProductUseCase;
 import com.company.admin.product_management.application.product.retrieve.get.GetProductByCodeUseCase;
 import com.company.admin.product_management.application.product.update.UpdateProductCommand;
 import com.company.admin.product_management.application.product.update.UpdateProductOutput;
@@ -27,15 +28,19 @@ public class ProductController implements ProductAPI {
     private final CreateProductUseCase createProductUseCase;
     private final GetProductByCodeUseCase getProductByCodeUseCase;
     private final UpdateProductUseCase updateProductUseCase;
+    private final DeleteProductUseCase deleteProductUseCase;
+
 
     public ProductController(
             final CreateProductUseCase createProductUseCase,
             final GetProductByCodeUseCase getProductByCodeUseCase,
-            final UpdateProductUseCase updateProductUseCase
+            final UpdateProductUseCase updateProductUseCase,
+            final DeleteProductUseCase deleteProductUseCase
     ) {
         this.createProductUseCase = Objects.requireNonNull(createProductUseCase);
         this.getProductByCodeUseCase = Objects.requireNonNull(getProductByCodeUseCase);
         this.updateProductUseCase = Objects.requireNonNull(updateProductUseCase);
+        this.deleteProductUseCase = Objects.requireNonNull(deleteProductUseCase);
     }
 
 
@@ -88,5 +93,10 @@ public class ProductController implements ProductAPI {
 
         return this.updateProductUseCase.execute(aCommand)
                 .fold(onError, onSuccess);
+    }
+
+    @Override
+    public void deleteByCode(String code) {
+        this.deleteProductUseCase.execute(Long.parseLong(code));
     }
 }

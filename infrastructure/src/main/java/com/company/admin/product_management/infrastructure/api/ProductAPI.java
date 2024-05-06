@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,4 +73,18 @@ public interface ProductAPI {
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     ResponseEntity<?> updateByCode(@PathVariable String code, @RequestBody UpdateProductApiInput input);
+
+    @RequestMapping(value = "/code/{code}", method = RequestMethod.DELETE)
+    @DeleteMapping(
+            value = "{code}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete a product by it's code")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Success"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+    })
+    void deleteByCode(@PathVariable String code);
 }

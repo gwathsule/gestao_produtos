@@ -2,6 +2,7 @@ package com.company.admin.product_management.infrastructure.api;
 
 import com.company.admin.product_management.application.product.create.CreateProductOutput;
 import com.company.admin.product_management.application.product.create.CreateProductUseCase;
+import com.company.admin.product_management.application.product.delete.DeleteProductUseCase;
 import com.company.admin.product_management.application.product.retrieve.get.GetProductByCodeUseCase;
 import com.company.admin.product_management.application.product.retrieve.get.ProductOutput;
 import com.company.admin.product_management.application.product.update.UpdateProductOutput;
@@ -53,6 +54,9 @@ public class ProductAPITest {
 
     @MockBean
     private UpdateProductUseCase updateProductUseCase;
+
+    @MockBean
+    private DeleteProductUseCase deleteProductUseCase;
 
     @Test
     public void givenAValidInput_whenCallCreateProductApi_thenReturnCreatedProduct() throws Exception{
@@ -410,4 +414,20 @@ public class ProductAPITest {
 
     }
 
+    @Test
+    public void givenAValidProductCode_whenCallsDeleteProductByCodeApi_thenShouldReturnNoContent() throws Exception{
+        final Long expectedCode = 123L;
+
+        doNothing().when(deleteProductUseCase).execute(any());
+
+        final var request = MockMvcRequestBuilders
+                .delete("/products/code/{code}", expectedCode.toString())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        final var response = this.mvc.perform(request).andDo(MockMvcResultHandlers.print());
+
+        response.andExpect(status().isNoContent());
+        verify(deleteProductUseCase, times(1)).execute(eq(expectedCode));
+    }
 }
