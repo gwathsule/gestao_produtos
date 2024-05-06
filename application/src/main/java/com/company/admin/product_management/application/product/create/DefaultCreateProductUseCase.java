@@ -3,7 +3,6 @@ package com.company.admin.product_management.application.product.create;
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
 import com.company.admin.product_management.domain.validation.handler.Notification;
-import com.company.admin.product_management.domain.validation.handler.ThrowsValidationHandler;
 import io.vavr.API;
 import io.vavr.control.Either;
 
