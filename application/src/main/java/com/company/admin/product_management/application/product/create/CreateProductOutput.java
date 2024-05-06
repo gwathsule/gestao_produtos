@@ -1,12 +1,15 @@
 package com.company.admin.product_management.application.product.create;
 
 import com.company.admin.product_management.domain.product.Product;
-import com.company.admin.product_management.domain.product.ProductID;
 
 public record CreateProductOutput(
-        ProductID id
+        Long productCode
 ) {
+    public static CreateProductOutput from(final Long productCode) {
+        return new CreateProductOutput(productCode);
+    }
+
     public static CreateProductOutput from(final Product aProduct) {
-        return new CreateProductOutput(aProduct.getId());
+        return new CreateProductOutput(aProduct.getCode());
     }
 }

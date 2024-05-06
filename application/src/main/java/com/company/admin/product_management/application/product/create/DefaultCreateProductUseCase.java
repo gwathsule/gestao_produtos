@@ -22,6 +22,7 @@ public class DefaultCreateProductUseCase extends CreateProductUseCase {
     @Override
     public Either<Notification, CreateProductOutput> execute(final CreateProductCommand aCommand) {
         final var aProduct = Product.newProduct(
+                123L,
                 aCommand.aDescription(),
                 aCommand.aFabricatedAt(),
                 aCommand.anExpiredAt(),

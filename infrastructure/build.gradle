@@ -32,6 +32,9 @@ dependencies {
     implementation(project(":domain"))
     implementation('mysql:mysql-connector-java')
 
+    implementation('org.springdoc:springdoc-openapi-webmvc-core:1.6.8')
+    implementation('org.springdoc:springdoc-openapi-ui:1.6.8')
+
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude module: 'spring-boot-starter-tomcat'
     }
@@ -41,6 +44,8 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test')
 
     testRuntimeOnly('com.h2database:h2')//testar esse BD com banco oficial pois ja vai no .jar e nao precisa de docker
+    // https://mvnrepository.com/artifact/io.vavr/vavr
+    implementation 'io.vavr:vavr:0.10.4'
 }
 
 flyway {

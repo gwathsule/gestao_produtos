@@ -58,7 +58,7 @@ public class CreateProductUseCaseTest {
         final var actualOutput = useCase.execute(aCommand).get();
 
         Assertions.assertNotNull(actualOutput);
-        Assertions.assertNotNull(actualOutput.id());
+        Assertions.assertNotNull(actualOutput.productCode());
 
         Mockito.verify(productGateway, times(1)).create(argThat(aProduct ->
                 Objects.equals(expectedDescription, aProduct.getDescription())
