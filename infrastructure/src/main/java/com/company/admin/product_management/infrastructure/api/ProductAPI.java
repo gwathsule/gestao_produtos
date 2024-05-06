@@ -3,6 +3,7 @@ package com.company.admin.product_management.infrastructure.api;
 import com.company.admin.product_management.domain.pagination.Pagination;
 import com.company.admin.product_management.infrastructure.product.models.CreateProductApiInput;
 import com.company.admin.product_management.infrastructure.product.models.ProductApiOutput;
+import com.company.admin.product_management.infrastructure.product.models.UpdateProductApiInput;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -44,7 +45,7 @@ public interface ProductAPI {
             @RequestParam(name = "dir", required = false, defaultValue = "asc") final String direction
     );
 
-    @RequestMapping("/code/{code}")
+    @RequestMapping(value = "/code/{code}", method = RequestMethod.GET)
     @GetMapping(
             value = "{code}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -57,4 +58,18 @@ public interface ProductAPI {
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     ProductApiOutput getByCode(@PathVariable String code);
+
+    @RequestMapping(value = "/code/{code}", method = RequestMethod.PUT)
+    @PutMapping(
+            value = "{code}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @Operation(summary = "Update a product by it's code")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "404", description = "Item not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+    })
+    ResponseEntity<?> updateByCode(@PathVariable String code, @RequestBody UpdateProductApiInput input);
 }

@@ -1,6 +1,7 @@
 package com.company.admin.product_management.application.product.update;
 
 import com.company.admin.product_management.domain.exceptions.DomainException;
+import com.company.admin.product_management.domain.exceptions.NotFoundException;
 import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductGateway;
 import org.junit.jupiter.api.Assertions;
@@ -36,9 +37,6 @@ public class UpdateProductUseCaseTest {
         Mockito.reset(productGateway);
     }
 
-    // 2. Teste passando uma propriedade inválida (name) TODO
-    // 3. Teste atualizando um produto para inativa TODO
-    // 4. Teste simulando um erro generico vindo do gateway TODO
 
     @Test
     public void givenAValidCommand_whenCallsUpdateProduct_shouldReturnProductId() {
@@ -86,7 +84,7 @@ public class UpdateProductUseCaseTest {
         final var actualOutput = useCase.execute(aCommand).get();
 
         Assertions.assertNotNull(actualOutput);
-        Assertions.assertNotNull(actualOutput.id());
+        Assertions.assertNotNull(actualOutput.code());
 
         Mockito.verify(productGateway, times(1)).findByCode(eq(expectedCode));
 
@@ -120,7 +118,6 @@ public class UpdateProductUseCaseTest {
         final var expectedSupplierCNPJ = "59456277000100";
         final var expectedIsActive = true;
         final var expectedErrorMessage = "Product with code 1234 was not found";
-        final var expectedErrorCount = 1;
 
 
         final var aCommand = UpdateProductCommand.with(
@@ -138,10 +135,9 @@ public class UpdateProductUseCaseTest {
         when(productGateway.findByCode(eq(expectedCode)))
                 .thenReturn(Optional.empty());
 
-        final var actualException = Assertions.assertThrows(DomainException.class, () -> useCase.execute(aCommand));
+        final var actualException = Assertions.assertThrows(NotFoundException.class, () -> useCase.execute(aCommand));
 
-        Assertions.assertEquals(expectedErrorCount, actualException.getErrors().size());
-        Assertions.assertEquals(expectedErrorMessage, actualException.getErrors().get(0).message());
+        Assertions.assertEquals(expectedErrorMessage, actualException.getMessage());
 
         Mockito.verify(productGateway, times(1)).findByCode(eq(expectedCode));
 

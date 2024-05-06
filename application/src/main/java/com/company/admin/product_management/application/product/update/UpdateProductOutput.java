@@ -4,9 +4,13 @@ import com.company.admin.product_management.domain.product.Product;
 import com.company.admin.product_management.domain.product.ProductID;
 
 public record UpdateProductOutput(
-        ProductID id
+        Long code
 ) {
     public static UpdateProductOutput from(final Product aProduct) {
-        return new UpdateProductOutput(aProduct.getId());
+        return new UpdateProductOutput(aProduct.getCode());
+    }
+
+    public static UpdateProductOutput from(final Long aCode) {
+        return new UpdateProductOutput(aCode);
     }
 }
