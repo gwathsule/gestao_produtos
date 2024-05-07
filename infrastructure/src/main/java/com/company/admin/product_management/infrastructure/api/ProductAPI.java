@@ -41,7 +41,7 @@ public interface ProductAPI {
             @RequestParam(name = "search", required = false, defaultValue = "") final String search,
             @RequestParam(name = "page", required = false, defaultValue = "0") final int page,
             @RequestParam(name = "perPage", required = false, defaultValue = "10") final int perPage,
-            @RequestParam(name = "sort", required = false, defaultValue = "name") final String sort,
+            @RequestParam(name = "sort", required = false, defaultValue = "code") final String sort,
             @RequestParam(name = "dir", required = false, defaultValue = "asc") final String direction
     );
 
@@ -59,9 +59,7 @@ public interface ProductAPI {
     })
     ProductResponse getByCode(@PathVariable String code);
 
-    @RequestMapping(value = "/code/{code}", method = RequestMethod.PUT)
     @PutMapping(
-            value = "{code}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -71,7 +69,7 @@ public interface ProductAPI {
             @ApiResponse(responseCode = "404", description = "Item not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    ResponseEntity<?> updateByCode(@PathVariable String code, @RequestBody UpdateProductRequest input);
+    ResponseEntity<?> updateByCode(@RequestBody UpdateProductRequest input);
 
     @RequestMapping(value = "/code/{code}", method = RequestMethod.DELETE)
     @DeleteMapping(

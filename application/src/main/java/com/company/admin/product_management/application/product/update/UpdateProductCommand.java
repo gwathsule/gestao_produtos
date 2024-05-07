@@ -3,7 +3,6 @@ package com.company.admin.product_management.application.product.update;
 import java.time.Instant;
 
 public record UpdateProductCommand(
-        String id,
         Long code,
         String description,
         Instant fabricatedAt,
@@ -14,7 +13,6 @@ public record UpdateProductCommand(
         boolean isActive
 ) {
     public static UpdateProductCommand with(
-            final String anId,
             final Long aCode,
             final String aDescription,
             final Instant aFabricatedAt,
@@ -25,7 +23,6 @@ public record UpdateProductCommand(
             final boolean isActive
     ) {
         return new UpdateProductCommand(
-                anId,
                 aCode,
                 aDescription,
                 aFabricatedAt,

@@ -64,7 +64,6 @@ public class UpdateProductUseCaseTest {
 
 
         final var aCommand = UpdateProductCommand.with(
-                expectedId.getValue(),
                 expectedCode,
                 expectedDescription,
                 expectedFabricatedAt,
@@ -121,7 +120,6 @@ public class UpdateProductUseCaseTest {
 
 
         final var aCommand = UpdateProductCommand.with(
-                expectedId,
                 expectedCode,
                 expectedDescription,
                 expectedFabricatedAt,

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 
 public record UpdateProductRequest(
-        @JsonProperty("id") String anId,
         @JsonProperty("code") Long aCode,
         @JsonProperty("description") String aDescription,
         @JsonProperty("fabricated_at") Instant aFabricatedAt,

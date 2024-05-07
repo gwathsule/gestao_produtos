@@ -284,7 +284,6 @@ public class ProductAPITest {
                 .thenReturn(Right(UpdateProductOutput.from(expectedCode)));
 
         final var aInput = new UpdateProductRequest(
-                expectedId,
                 expectedCode,
                 expectedDescription,
                 expectedFabricatedAt,
@@ -296,7 +295,7 @@ public class ProductAPITest {
         );
 
         final var request = MockMvcRequestBuilders
-                .put("/products/code/{code}", expectedCode.toString())
+                .put("/products", expectedCode.toString())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(aInput));
@@ -335,7 +334,6 @@ public class ProductAPITest {
                 .thenThrow(NotFoundException.with(Product.class, expectedCode));
 
         final var aInput = new UpdateProductRequest(
-                expectedId,
                 expectedCode,
                 expectedDescription,
                 expectedFabricatedAt,
@@ -347,7 +345,7 @@ public class ProductAPITest {
         );
 
         final var request = MockMvcRequestBuilders
-                .put("/products/code/{code}", expectedCode.toString())
+                .put("/products", expectedCode.toString())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(aInput));
@@ -386,7 +384,6 @@ public class ProductAPITest {
                 .thenReturn(Left(Notification.create(new Error(expectedErrorMessage))));
 
         final var aInput = new UpdateProductRequest(
-                expectedId,
                 expectedCode,
                 expectedDescription,
                 expectedFabricatedAt,
@@ -398,7 +395,7 @@ public class ProductAPITest {
         );
 
         final var request = MockMvcRequestBuilders
-                .put("/products/code/{code}", expectedCode.toString())
+                .put("/products", expectedCode.toString())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(aInput));

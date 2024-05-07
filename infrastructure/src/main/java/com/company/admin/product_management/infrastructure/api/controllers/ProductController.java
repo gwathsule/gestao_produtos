@@ -76,9 +76,8 @@ public class ProductController implements ProductAPI {
     }
 
     @Override
-    public ResponseEntity<?> updateByCode(String code, UpdateProductRequest input) {
+    public ResponseEntity<?> updateByCode(UpdateProductRequest input) {
         final var aCommand = UpdateProductCommand.with(
-                input.anId(),
                 input.aCode(),
                 input.aDescription(),
                 input.aFabricatedAt(),
