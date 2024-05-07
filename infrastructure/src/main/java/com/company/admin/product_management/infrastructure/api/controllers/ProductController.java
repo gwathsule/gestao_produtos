@@ -5,15 +5,18 @@ import com.company.admin.product_management.application.product.create.CreatePro
 import com.company.admin.product_management.application.product.create.CreateProductUseCase;
 import com.company.admin.product_management.application.product.delete.DeleteProductUseCase;
 import com.company.admin.product_management.application.product.retrieve.get.GetProductByCodeUseCase;
+import com.company.admin.product_management.application.product.retrieve.list.ListProductsUseCase;
 import com.company.admin.product_management.application.product.update.UpdateProductCommand;
 import com.company.admin.product_management.application.product.update.UpdateProductOutput;
 import com.company.admin.product_management.application.product.update.UpdateProductUseCase;
 import com.company.admin.product_management.domain.pagination.Pagination;
+import com.company.admin.product_management.domain.product.ProductSearchQuery;
 import com.company.admin.product_management.domain.validation.handler.Notification;
 import com.company.admin.product_management.infrastructure.api.ProductAPI;
-import com.company.admin.product_management.infrastructure.product.models.CreateProductApiInput;
-import com.company.admin.product_management.infrastructure.product.models.ProductApiOutput;
-import com.company.admin.product_management.infrastructure.product.models.UpdateProductApiInput;
+import com.company.admin.product_management.infrastructure.product.models.CreateProductRequest;
+import com.company.admin.product_management.infrastructure.product.models.ProductListResponse;
+import com.company.admin.product_management.infrastructure.product.models.ProductResponse;
+import com.company.admin.product_management.infrastructure.product.models.UpdateProductRequest;
 import com.company.admin.product_management.infrastructure.product.presenters.ProductApiPresenter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,23 +32,26 @@ public class ProductController implements ProductAPI {
     private final GetProductByCodeUseCase getProductByCodeUseCase;
     private final UpdateProductUseCase updateProductUseCase;
     private final DeleteProductUseCase deleteProductUseCase;
+    private final ListProductsUseCase listProductsUseCase;
 
 
     public ProductController(
             final CreateProductUseCase createProductUseCase,
             final GetProductByCodeUseCase getProductByCodeUseCase,
             final UpdateProductUseCase updateProductUseCase,
-            final DeleteProductUseCase deleteProductUseCase
+            final DeleteProductUseCase deleteProductUseCase,
+            final ListProductsUseCase listProductsUseCase
     ) {
         this.createProductUseCase = Objects.requireNonNull(createProductUseCase);
         this.getProductByCodeUseCase = Objects.requireNonNull(getProductByCodeUseCase);
         this.updateProductUseCase = Objects.requireNonNull(updateProductUseCase);
         this.deleteProductUseCase = Objects.requireNonNull(deleteProductUseCase);
+        this.listProductsUseCase = Objects.requireNonNull(listProductsUseCase);
     }
 
 
     @Override
-    public ResponseEntity<?> createProduct(final CreateProductApiInput input) {
+    public ResponseEntity<?> createProduct(final CreateProductRequest input) {
         final var aCommand = CreateProductCommand.with(
                 input.aDescription(),
                 input.aFabricatedAt(),
@@ -65,17 +71,12 @@ public class ProductController implements ProductAPI {
     }
 
     @Override
-    public Pagination<?> listProduct(String search, int page, int perPage, String sort, String direction) {
-        return null;
-    }
-
-    @Override
-    public ProductApiOutput getByCode(final String code) {
+    public ProductResponse getByCode(final String code) {
         return ProductApiPresenter.present(this.getProductByCodeUseCase.execute(Long.parseLong(code)));
     }
 
     @Override
-    public ResponseEntity<?> updateByCode(String code, UpdateProductApiInput input) {
+    public ResponseEntity<?> updateByCode(String code, UpdateProductRequest input) {
         final var aCommand = UpdateProductCommand.with(
                 input.anId(),
                 input.aCode(),
@@ -98,5 +99,17 @@ public class ProductController implements ProductAPI {
     @Override
     public void deleteByCode(String code) {
         this.deleteProductUseCase.execute(Long.parseLong(code));
+    }
+
+    @Override
+    public Pagination<ProductListResponse> listProduct(
+            String search,
+            int page,
+            int perPage,
+            String sort,
+            String direction
+    ) {
+        return listProductsUseCase.execute(new ProductSearchQuery(page, perPage, search, sort, direction))
+                .map(ProductApiPresenter::present);
     }
 }

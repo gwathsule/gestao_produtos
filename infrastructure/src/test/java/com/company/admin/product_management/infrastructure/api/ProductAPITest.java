@@ -5,16 +5,20 @@ import com.company.admin.product_management.application.product.create.CreatePro
 import com.company.admin.product_management.application.product.delete.DeleteProductUseCase;
 import com.company.admin.product_management.application.product.retrieve.get.GetProductByCodeUseCase;
 import com.company.admin.product_management.application.product.retrieve.get.ProductOutput;
+import com.company.admin.product_management.application.product.retrieve.list.ListProductsUseCase;
+import com.company.admin.product_management.application.product.retrieve.list.ProductListOutput;
 import com.company.admin.product_management.application.product.update.UpdateProductOutput;
 import com.company.admin.product_management.application.product.update.UpdateProductUseCase;
 import com.company.admin.product_management.domain.exceptions.DomainException;
 import com.company.admin.product_management.domain.exceptions.NotFoundException;
+import com.company.admin.product_management.domain.pagination.Pagination;
 import com.company.admin.product_management.domain.product.Product;
+import com.company.admin.product_management.domain.product.ProductID;
 import com.company.admin.product_management.domain.validation.Error;
 import com.company.admin.product_management.domain.validation.handler.Notification;
 import com.company.admin.product_management.infrastructure.ControllerTest;
-import com.company.admin.product_management.infrastructure.product.models.CreateProductApiInput;
-import com.company.admin.product_management.infrastructure.product.models.UpdateProductApiInput;
+import com.company.admin.product_management.infrastructure.product.models.CreateProductRequest;
+import com.company.admin.product_management.infrastructure.product.models.UpdateProductRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -28,6 +32,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
 
 import static io.vavr.API.*;
@@ -58,6 +63,9 @@ public class ProductAPITest {
     @MockBean
     private DeleteProductUseCase deleteProductUseCase;
 
+    @MockBean
+    private ListProductsUseCase listProductsUseCase;
+
     @Test
     public void givenAValidInput_whenCallCreateProductApi_thenReturnCreatedProduct() throws Exception{
         final var expectedDescription = "A normal product description.";
@@ -68,7 +76,7 @@ public class ProductAPITest {
         final var expectedSupplierCNPJ = "59456277000176";
         final var expectedIsActive = true;
 
-        final var aInput = new CreateProductApiInput(
+        final var aInput = new CreateProductRequest(
                 expectedDescription,
                 expectedFabricatedAt,
                 expectedExpiredAt,
@@ -114,7 +122,7 @@ public class ProductAPITest {
         final var expectedIsActive = true;
         final var expectedErrorMessage = "'description' should not be null";
 
-        final var aInput = new CreateProductApiInput(
+        final var aInput = new CreateProductRequest(
                 expectedDescription,
                 expectedFabricatedAt,
                 expectedExpiredAt,
@@ -161,7 +169,7 @@ public class ProductAPITest {
         final var expectedIsActive = true;
         final var expectedErrorMessage = "'description' should not be null";
 
-        final var aInput = new CreateProductApiInput(
+        final var aInput = new CreateProductRequest(
                 expectedDescription,
                 expectedFabricatedAt,
                 expectedExpiredAt,
@@ -275,7 +283,7 @@ public class ProductAPITest {
         when(updateProductUseCase.execute(any()))
                 .thenReturn(Right(UpdateProductOutput.from(expectedCode)));
 
-        final var aInput = new UpdateProductApiInput(
+        final var aInput = new UpdateProductRequest(
                 expectedId,
                 expectedCode,
                 expectedDescription,
@@ -326,7 +334,7 @@ public class ProductAPITest {
         when(updateProductUseCase.execute(any()))
                 .thenThrow(NotFoundException.with(Product.class, expectedCode));
 
-        final var aInput = new UpdateProductApiInput(
+        final var aInput = new UpdateProductRequest(
                 expectedId,
                 expectedCode,
                 expectedDescription,
@@ -377,7 +385,7 @@ public class ProductAPITest {
         when(updateProductUseCase.execute(any()))
                 .thenReturn(Left(Notification.create(new Error(expectedErrorMessage))));
 
-        final var aInput = new UpdateProductApiInput(
+        final var aInput = new UpdateProductRequest(
                 expectedId,
                 expectedCode,
                 expectedDescription,
@@ -429,5 +437,72 @@ public class ProductAPITest {
 
         response.andExpect(status().isNoContent());
         verify(deleteProductUseCase, times(1)).execute(eq(expectedCode));
+    }
+
+    @Test
+    public void givenAValidParams_whenCallsListProductsApi_thenShouldReturnProducts() throws Exception{
+        final var aProduct1 = Product.newProduct(
+                123L,
+                "first product.",
+                Instant.now(),
+                Instant.now().plus(50, ChronoUnit.DAYS),
+                "first-product.",
+                "first product.",
+                "11111111111111",
+                true
+        );
+
+        final var expectedPage = 0;
+        final var expectedPerPage = 10;
+        final var expectedTerms = "first";
+        final var expectedSort = "description";
+        final var expectedDirection = "desc";
+        final var expectedItemsCount = 1;
+        final var expectedTotal = 1;
+
+        final var expectedItems = List.of(
+                ProductListOutput.from(aProduct1)
+        );
+
+        when(listProductsUseCase.execute(any()))
+                .thenReturn(new Pagination<>(expectedPage, expectedPerPage, expectedTotal, expectedItems));
+
+        final var request = MockMvcRequestBuilders
+                .get("/products")
+                .queryParam("page", String.valueOf(expectedPage))
+                .queryParam("perPage", String.valueOf(expectedPerPage))
+                .queryParam("sort", expectedSort)
+                .queryParam("dir", expectedDirection)
+                .queryParam("search", expectedTerms)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        final var response = this.mvc.perform(request).andDo(MockMvcResultHandlers.print());
+
+        response.andExpect(status().isOk())
+                .andExpect(jsonPath("$.current_page", equalTo(expectedPage)))
+                .andExpect(jsonPath("$.per_page", equalTo(expectedPerPage)))
+                .andExpect(jsonPath("$.total", equalTo(expectedTotal)))
+                .andExpect(jsonPath("$.items", hasSize(expectedItemsCount)))
+                .andExpect(jsonPath("$.items[0].id", equalTo(aProduct1.getId().getValue())))
+                .andExpect(jsonPath("$.items[0].description", equalTo(aProduct1.getDescription())))
+                .andExpect(jsonPath("$.items[0].fabricated_at", equalTo(aProduct1.getFabricatedAt().toString())))
+                .andExpect(jsonPath("$.items[0].expired_at", equalTo(aProduct1.getExpiredAt().toString())))
+                .andExpect(jsonPath("$.items[0].supplier_code", equalTo(aProduct1.getSupplierCode())))
+                .andExpect(jsonPath("$.items[0].supplier_description", equalTo(aProduct1.getSupplierDescription())))
+                .andExpect(jsonPath("$.items[0].supplier_cnpj", equalTo(aProduct1.getSupplierCNPJ())))
+                .andExpect(jsonPath("$.items[0].is_active", equalTo(aProduct1.isActive())))
+                .andExpect(jsonPath("$.items[0].created_at", equalTo(aProduct1.getCreatedAt().toString())))
+                .andExpect(jsonPath("$.items[0].deleted_at", equalTo(aProduct1.getDeletedAt())))
+                .andExpect(jsonPath("$.items[0].code", equalTo(aProduct1.getCode().toString())));
+
+        verify(listProductsUseCase, times(1)).execute(argThat(query ->
+                    Objects.equals(expectedPage, query.page())
+                            &&  Objects.equals(expectedPerPage, query.perPage())
+                            &&  Objects.equals(expectedDirection, query.direction())
+                            &&  Objects.equals(expectedSort, query.sort())
+                            &&  Objects.equals(expectedTerms, query.terms())
+                ));
+
     }
 }

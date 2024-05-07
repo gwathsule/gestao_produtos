@@ -1,9 +1,10 @@
 package com.company.admin.product_management.infrastructure.api;
 
 import com.company.admin.product_management.domain.pagination.Pagination;
-import com.company.admin.product_management.infrastructure.product.models.CreateProductApiInput;
-import com.company.admin.product_management.infrastructure.product.models.ProductApiOutput;
-import com.company.admin.product_management.infrastructure.product.models.UpdateProductApiInput;
+import com.company.admin.product_management.infrastructure.product.models.CreateProductRequest;
+import com.company.admin.product_management.infrastructure.product.models.ProductListResponse;
+import com.company.admin.product_management.infrastructure.product.models.ProductResponse;
+import com.company.admin.product_management.infrastructure.product.models.UpdateProductRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -12,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @RequestMapping(value = "products")
 @Tag(name = "Products")
@@ -29,7 +28,7 @@ public interface ProductAPI {
             @ApiResponse(responseCode = "422", description = "Validation error"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    ResponseEntity<?> createProduct(@RequestBody CreateProductApiInput input);
+    ResponseEntity<?> createProduct(@RequestBody CreateProductRequest input);
 
     @GetMapping
     @Operation(summary = "List paginated products")
@@ -38,7 +37,7 @@ public interface ProductAPI {
             @ApiResponse(responseCode = "422", description = "Validation error"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    Pagination<?> listProduct(
+    Pagination<ProductListResponse> listProduct(
             @RequestParam(name = "search", required = false, defaultValue = "") final String search,
             @RequestParam(name = "page", required = false, defaultValue = "0") final int page,
             @RequestParam(name = "perPage", required = false, defaultValue = "10") final int perPage,
@@ -58,7 +57,7 @@ public interface ProductAPI {
             @ApiResponse(responseCode = "404", description = "Item not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    ProductApiOutput getByCode(@PathVariable String code);
+    ProductResponse getByCode(@PathVariable String code);
 
     @RequestMapping(value = "/code/{code}", method = RequestMethod.PUT)
     @PutMapping(
@@ -72,7 +71,7 @@ public interface ProductAPI {
             @ApiResponse(responseCode = "404", description = "Item not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    ResponseEntity<?> updateByCode(@PathVariable String code, @RequestBody UpdateProductApiInput input);
+    ResponseEntity<?> updateByCode(@PathVariable String code, @RequestBody UpdateProductRequest input);
 
     @RequestMapping(value = "/code/{code}", method = RequestMethod.DELETE)
     @DeleteMapping(

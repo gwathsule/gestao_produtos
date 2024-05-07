@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 
-public record UpdateProductApiInput(
-        @JsonProperty("id") String anId,
-        @JsonProperty("code") Long aCode,
+public record CreateProductRequest(
         @JsonProperty("description") String aDescription,
         @JsonProperty("fabricated_at") Instant aFabricatedAt,
         @JsonProperty("expired_at") Instant anExpiredAt,
@@ -14,5 +12,5 @@ public record UpdateProductApiInput(
         @JsonProperty("supplier_description") String aSupplierDescription,
         @JsonProperty("supplier_cnpj") String aSupplierCNPJ,
         @JsonProperty("is_active") Boolean isActive
-){
+) {
 }
